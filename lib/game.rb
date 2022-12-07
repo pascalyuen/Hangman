@@ -1,9 +1,11 @@
 require_relative 'display'
+require 'pry-byebug'
 
 class Game
   include Display
 
   attr_reader :round_number, :user_input, :secret_word
+  attr_accessor :guess
 
   TOTAL_ROUNDS = 8
 
@@ -12,20 +14,21 @@ class Game
     puts instructions
 
     @round_number = 0
-    # Testing with one round
-    round
+    @guess = Array.new(@secret_word.length) { '_' }
 
-    # while round_number < 8
-    #   break if round
-    #   round_number += 1
-    # end
+    # # Testing with one round
+    # round
+
+    while @round_number < 8
+      break if round
+      @round_number += 1
+    end
   end
 
   def round
     # Display underscores and remaining tries
     puts "#{TOTAL_ROUNDS - @round_number} tries remaining"
-    secret_word.length.times { print '_ ' }
-    puts
+    puts @guess.join(' ')
 
     @user_input = get_input
 
@@ -37,16 +40,16 @@ class Game
 
   def check_letter
     # B1. Last letter and correct guess
-    # B2. Not last letter, correct guess
-    if @secret_word.include?(@user_input)
-      @secret_word.each_char do |c|
-        if c == @user_input
-          print "#{c} "
-          else
-            print '_ '
-          end
+    if @guess.count('_') == 1
+      update_guess(@secret_word, @guess, @user_input)
+      if @guess.join('') == @secret_word
+        puts correct_guess
+        true
       end
-      puts
+    # Not last letter, correct guess
+    elsif @secret_word.include?(@user_input)
+      update_guess(@secret_word, @guess, @user_input)
+      puts @guess.join(' ')
     end
 
     # B3. Not last letter, incorrect guess -> Nothing happens
@@ -69,6 +72,12 @@ class Game
       input = gets.chomp
     end
     input
+  end
+
+  def update_guess(secret_word, guess, user_input)
+    secret_word.each_char.with_index do |c, idx|
+      guess[idx] = c if c == user_input
+    end
   end
 
   def load_file
