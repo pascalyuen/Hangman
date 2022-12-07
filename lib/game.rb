@@ -13,13 +13,10 @@ class Game
     load_file
     puts instructions
 
-    @round_number = 0
+    @round_number = 1
     @guess = Array.new(@secret_word.length) { '_' }
 
-    # # Testing with one round
-    # round
-
-    while @round_number < 8
+    while @round_number <= 8
       break if round
       @round_number += 1
     end
@@ -27,42 +24,43 @@ class Game
 
   def round
     # Display underscores and remaining tries
-    puts "#{TOTAL_ROUNDS - @round_number} tries remaining"
+    puts "#{TOTAL_ROUNDS - @round_number + 1} tries remaining"
     puts @guess.join(' ')
 
     @user_input = get_input
 
     # Determine if the input is a word or a letter
     @user_input.length == 1 ? check_letter : check_word
-  
-    # C. Last round, incorrect guess (word or letter)
-  end
+    end
 
   def check_letter
-    # B1. Last letter and correct guess
-    if @guess.count('_') == 1
+    # Last round
+    if @round_number == TOTAL_ROUNDS && @guess.join('') != @secret_word
+      puts game_over
+    end
+
+    # Correct guess
+    if @secret_word.include?(@user_input)
       update_guess(@secret_word, @guess, @user_input)
       if @guess.join('') == @secret_word
         puts correct_guess
         true
       end
-    # Not last letter, correct guess
-    elsif @secret_word.include?(@user_input)
-      update_guess(@secret_word, @guess, @user_input)
-      puts @guess.join(' ')
     end
 
-    # B3. Not last letter, incorrect guess -> Nothing happens
+    # Incorrect guess, not last round -> Nothing happens
   end
 
   def check_word
-        # A1. Whole word, correct guess
+        # Correct guess
         if @user_input == @secret_word
           puts correct_guess
           true
+        elsif @round_number == TOTAL_ROUNDS
+          puts game_over
         end
-    
-        # A2. Whole word, incorrect guess -> Nothing happens
+
+        # Incorrect guess, not last round -> Nothing happens
   end
 
   def get_input
@@ -88,7 +86,7 @@ class Game
         dictionary << word
       end
 
-    # Select a word between 5 and 12 characters long
+    # Select a word between 5 and 12 characters long from the dictionary
     loop do
       @secret_word = dictionary.sample(1)[0].downcase
       break if @secret_word.length.between?(5, 12)

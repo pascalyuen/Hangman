@@ -14,4 +14,8 @@ module Display
   def correct_guess
     'Congratulations! You guessed it!'
   end
+
+  def game_over
+    'Game Over!'
+  end
 end
