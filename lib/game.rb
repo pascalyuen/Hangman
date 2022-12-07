@@ -21,7 +21,9 @@ class Game
 
   def round
     # Display underscores
-    # secret_word.length.times { print '_ ' }
+    secret_word.length.times { print '_ ' }
+    puts
+
     user_input = get_input
     
     # A1. Whole word, correct guess
@@ -53,7 +55,13 @@ class Game
         word = file.readline.chomp
         dictionary << word
       end
-    @secret_word = dictionary.sample(1)[0]
-    puts "The secret word is #{@secret_word}"
+
+    # Select a word between 5 and 12 characters long
+    loop do
+      @secret_word = dictionary.sample(1)[0]
+      break if @secret_word.length.between?(5, 12)
+    end
+
+    puts "The secret word is #{@secret_word}(#{@secret_word.length})"
   end
 end
