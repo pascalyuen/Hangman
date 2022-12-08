@@ -7,13 +7,13 @@ module Display
   def instructions
     %(
 Try to guess the secret word within 8 turns!
-To start the game, enter a word or a letter
+To start a new game, enter "1"
 To load a save, enter "2"
 )
   end
 
   def new_save_instructions
-    'Enter "1" to save the game'
+    'To save a game, enter "3"'
   end
 
   def enter_guess

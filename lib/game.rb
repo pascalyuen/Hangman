@@ -16,6 +16,17 @@ class Game
     load_file
     puts instructions
 
+    # Execute if player loads game
+    @user_input = input
+    case @user_input
+    when '1'
+      new_game
+    when '2'
+      load_game
+    end
+  end
+
+  def new_game
     @round_number = 1
     @guess = Array.new(@secret_word.length) { '_' }
 
@@ -34,8 +45,8 @@ class Game
 
     @user_input = input
 
-    # Save game
-    new_save if @user_input == '1'
+    # Execute if player saves game
+    new_save if @user_input == '3'
 
     # Determine if the input is a word or a letter
     @user_input.length == 1 ? check_letter : check_word
@@ -67,7 +78,7 @@ class Game
 
   def input
     input = gets.chomp
-    until input.match(/[a-zA-Z]{1,12}/) || input.match(/[1-2]{1}/)
+    until input.match(/[a-zA-Z]{1,12}/) || input.match(/[1-3]{1}/)
       puts "#{invalid_input}. #{enter_guess}"
       input = gets.chomp
     end
@@ -103,15 +114,21 @@ class Game
 
   def to_yaml
     YAML.dump({
-      round_number: @round_number,
-      guess: @guess,
-      secret_word: @secret_word
+                round_number: @round_number,
+                guess: @guess,
+                secret_word: @secret_word
               })
   end
 
   def new_save
     Dir.mkdir('saves') unless Dir.exist?('saves')
-    # saved_game = File.new('./../saved_games/saved.yaml')
-    # File.open(saved_game, 'w') { puts Game.to_yaml }
+    file_name = 'saves/saved_game'
+    File.open(file_name, 'w') do |file|
+      file << to_yaml
+    end
+  end
+
+  def load_game
+    puts 'Game loaded'
   end
 end
