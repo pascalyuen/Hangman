@@ -12,18 +12,14 @@ class Hangman
     puts instructions
 
     # Execute when player loads game
-    @user_input = Game.input
-    case @user_input
+    case Game.input
     when '1'
       Game.new.new_game
     when '2'
-      file_name = 'saves/saved_game'
       data = ''
-      File.open(file_name, 'r') do |file|
-        data = Game.from_yaml(file)
-      end
+      File.open('saves/saved_game', 'r') { |file| data = Game.from_yaml(file) }
 
-      game = Game.new(data[:round_number], data[:guess], data[:secret_word])
+      game = Game.new_game(data[:round_number], data[:guess], data[:secret_word])
       game.load_game
     end
   end

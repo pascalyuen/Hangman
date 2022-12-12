@@ -38,8 +38,6 @@ class Game
   def all_rounds
     while @round_number <= 8
       break if round
-
-      @round_number += 1
     end
   end
 
@@ -66,10 +64,14 @@ class Game
     puts game_over if @round_number == TOTAL_ROUNDS && @guess.join('') != @secret_word
 
     # Correct guess of the whole word
-    return unless @guess.join('') == @secret_word
-
-    puts correct_guess
-    true
+    if @guess.join('') == @secret_word
+      puts correct_guess
+      true
+    # Add one to round number if a new letter is not discovered
+    elsif !@secret_word.include?(@user_input)
+      @round_number += 1
+      false
+    end
   end
 
   def check_word
@@ -77,10 +79,15 @@ class Game
     if @user_input == @secret_word
       puts correct_guess
       true
+    # Not last round and wrong guess -> add round number
+    elsif @round_number <= TOTAL_ROUNDS
+      @round_number += 1
     # Last round and wrong guess -> game over
-    elsif @round_number == TOTAL_ROUNDS
+    else
       puts game_over
     end
+
+    false
   end
 
   def self.input
