@@ -26,3 +26,4 @@ class Hangman
 end
 
 Hangman.new.play
+
