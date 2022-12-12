@@ -3,7 +3,7 @@
 require_relative 'display'
 require 'yaml'
 
-# Main class for the game
+# Class for the game
 class Game
   include Display
 
@@ -12,24 +12,30 @@ class Game
 
   TOTAL_ROUNDS = 8
 
-  def play
-    load_file
-    puts instructions
-
-    # Execute if player loads game
-    @user_input = input
-    case @user_input
-    when '1'
-      new_game
-    when '2'
-      load_game
-    end
+  def initialize(round_number = 1, guess = [], secret_word = 'testing')
+    @round_number = round_number
+    @guess = guess
+    @secret_word = secret_word
   end
 
   def new_game
-    @round_number = 1
+    load_dictionary
+    @secret_word = random_word
     @guess = Array.new(@secret_word.length) { '_' }
 
+    all_rounds
+  end
+
+  def load_game
+    unless File.exist?('saves/saved_game')
+      puts 'File does not exist'
+      return
+    end
+    puts '*** Save loaded ***'
+    all_rounds
+  end
+
+  def all_rounds
     while @round_number <= 8
       break if round
 
@@ -39,11 +45,12 @@ class Game
 
   def round
     # Display underscores and remaining tries
+    # puts "The secret word is #{@secret_word}(#{@secret_word.length})"
     puts "#{TOTAL_ROUNDS - @round_number + 1} tries remaining"
     puts @guess.join(' ')
     puts new_save_instructions
 
-    @user_input = input
+    @user_input = Game.input
 
     # Execute if player saves game
     new_save if @user_input == '3'
@@ -76,9 +83,9 @@ class Game
     end
   end
 
-  def input
-    input = gets.chomp
-    until input.match(/[a-zA-Z]{1,12}/) || input.match(/[1-3]{1}/)
+  def self.input
+    input = gets.chomp.downcase
+    until input.match(/[a-z]{1,12}/) || input.match(/[1-3]{1}/)
       puts "#{invalid_input}. #{enter_guess}"
       input = gets.chomp
     end
@@ -91,25 +98,31 @@ class Game
     end
   end
 
-  def load_file
+  def load_dictionary
     @dictionary = []
     file = File.open('dictionary.txt', 'r')
     until file.eof?
       word = file.readline.chomp
       @dictionary << word
     end
-
-    # Select a word between 5 and 12 characters long from the dictionary
-    random_word
-
-    puts "The secret word is #{@secret_word}(#{@secret_word.length})"
   end
 
   def random_word
     loop do
-      @secret_word = @dictionary.sample(1)[0].downcase
+      @secret_word = @dictionary.sample(1)[0]
       break if @secret_word.length.between?(5, 12)
     end
+    @secret_word
+  end
+
+  def new_save
+    Dir.mkdir('saves') unless Dir.exist?('saves')
+    file_name = 'saves/saved_game'
+    File.open(file_name, 'w') do |file|
+      file << to_yaml
+    end
+
+    puts '*** Saved ***'
   end
 
   def to_yaml
@@ -120,15 +133,7 @@ class Game
               })
   end
 
-  def new_save
-    Dir.mkdir('saves') unless Dir.exist?('saves')
-    file_name = 'saves/saved_game'
-    File.open(file_name, 'w') do |file|
-      file << to_yaml
-    end
-  end
-
-  def load_game
-    puts 'Game loaded'
+  def self.from_yaml(string)
+    YAML.load(string)
   end
 end

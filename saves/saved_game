@@ -1,0 +1,10 @@
+---
+:round_number: 6
+:guess:
+- t
+- u
+- c
+- _
+- o
+- "n"
+:secret_word: tucson
