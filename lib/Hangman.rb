@@ -17,9 +17,9 @@ class Hangman
       Game.new.new_game
     when '2'
       data = ''
-      File.open('saves/saved_game', 'r') { |file| data = Game.from_yaml(file) }
+      File.open('saves/saved_game', 'r') { |file| data = YAML.load(file) }
 
-      game = Game.new_game(data[:round_number], data[:guess], data[:secret_word])
+      game = Game.new(data[:round_number], data[:guess], data[:secret_word])
       game.load_game
     end
   end

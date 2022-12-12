@@ -28,7 +28,7 @@ To load a save, enter "2"
     "Congratulations! You guessed it! The secret word is #{@secret_word}"
   end
 
-  def game_over
+  def game_over_msg
     "Game Over! The secret word is #{@secret_word}"
   end
 end

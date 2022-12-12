@@ -1,10 +1,14 @@
 ---
-:round_number: 6
+:round_number: 1
 :guess:
-- t
-- u
-- c
 - _
-- o
-- "n"
-:secret_word: tucson
+- _
+- _
+- _
+- _
+- _
+- _
+- _
+- _
+- _
+:secret_word: multimedia

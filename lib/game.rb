@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 require_relative 'display'
+require_relative 'dictionary'
 require 'yaml'
 
 # Class for the game
 class Game
   include Display
 
-  attr_reader :round_number, :dictionary, :user_input, :secret_word
+  attr_reader :round_number, :dictionary, :user_input, :secret_word, :game_over
   attr_accessor :guess
 
   TOTAL_ROUNDS = 8
@@ -19,9 +20,9 @@ class Game
   end
 
   def new_game
-    load_dictionary
-    @secret_word = random_word
+    @secret_word = Dictionary.new.random_word
     @guess = Array.new(@secret_word.length) { '_' }
+    @game_over = false
 
     all_rounds
   end
@@ -31,19 +32,21 @@ class Game
       puts 'File does not exist'
       return
     end
+    @game_over = false
     puts '*** Save loaded ***'
     all_rounds
   end
 
   def all_rounds
     while @round_number <= 8
-      break if round
+      round
+      break if game_over
     end
   end
 
   def round
     # Display underscores and remaining tries
-    # puts "The secret word is #{@secret_word}(#{@secret_word.length})"
+    puts "The secret word is #{@secret_word}(#{@secret_word.length})"
     puts "#{TOTAL_ROUNDS - @round_number + 1} tries remaining"
     puts @guess.join(' ')
     puts new_save_instructions
@@ -60,17 +63,17 @@ class Game
   def check_letter
     update_guess(@secret_word, @guess, @user_input)
 
-    # Last round and wrong guess -> game over
-    puts game_over if @round_number == TOTAL_ROUNDS && @guess.join('') != @secret_word
-
     # Correct guess of the whole word
     if @guess.join('') == @secret_word
       puts correct_guess
-      true
+      @game_over = true
+    # Last round and wrong guess -> game over
+    elsif round_number == TOTAL_ROUNDS
+      puts game_over_msg
+      @game_over = true
     # Add one to round number if a new letter is not discovered
     elsif !@secret_word.include?(@user_input)
       @round_number += 1
-      false
     end
   end
 
@@ -78,16 +81,15 @@ class Game
     # Correct guess
     if @user_input == @secret_word
       puts correct_guess
-      true
+      @game_over = true
     # Not last round and wrong guess -> add round number
-    elsif @round_number <= TOTAL_ROUNDS
+    elsif @round_number < TOTAL_ROUNDS
       @round_number += 1
     # Last round and wrong guess -> game over
     else
-      puts game_over
+      puts game_over_msg
+      @game_over = true
     end
-
-    false
   end
 
   def self.input
@@ -105,30 +107,9 @@ class Game
     end
   end
 
-  def load_dictionary
-    @dictionary = []
-    file = File.open('dictionary.txt', 'r')
-    until file.eof?
-      word = file.readline.chomp
-      @dictionary << word
-    end
-  end
-
-  def random_word
-    loop do
-      @secret_word = @dictionary.sample(1)[0]
-      break if @secret_word.length.between?(5, 12)
-    end
-    @secret_word
-  end
-
   def new_save
     Dir.mkdir('saves') unless Dir.exist?('saves')
-    file_name = 'saves/saved_game'
-    File.open(file_name, 'w') do |file|
-      file << to_yaml
-    end
-
+    File.open('saves/saved_game', 'w') { |file| file << to_yaml }
     puts '*** Saved ***'
   end
 
@@ -138,9 +119,5 @@ class Game
                 guess: @guess,
                 secret_word: @secret_word
               })
-  end
-
-  def self.from_yaml(string)
-    YAML.load(string)
   end
 end
